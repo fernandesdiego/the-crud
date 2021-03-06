@@ -1,0 +1,82 @@
+﻿@model TheCRUD.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    <main role="main" class="pb-3">
+        <h3>Dashboard</h3>
+        <hr>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header"># of Products</div>
+                    <div class="card-body text-center"><h1 id="prod-count"></h1></div>
+                </div>
+                <br>
+                <div class="card">
+                    <div class="card-header"># of Warehouses</div>
+                    <div class="card-body text-center"><h1 id="ware-count"></h1></div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <canvas id="assets-warehouse"></canvas>
+            </div>
+        </div>
+    </main>
+</div>
+
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+    <script>
+        let labelArray = [];
+        let dataArray = [];
+
+        async function getResponse() {
+            const response = await fetch('@Url.RouteUrl(new { action = "DashBoardData", controller = "Home" })');
+            const json = await response.json();
+            return JSON.parse(json);
+        }
+
+        getResponse().then(function(value) {            
+            value.Warehouses.$values.forEach(function(element){
+                labelArray.push(element.Name);
+                
+	        });
+            value.Warehouses.$values.forEach(function(element){
+                dataArray.push(element.Products.$values.length);
+                
+            });
+
+            chart.update();
+            document.getElementById('prod-count').innerText = dataArray.reduce((a, b) => a + b, 0);
+            document.getElementById('ware-count').innerText = labelArray.length;
+
+        });
+   
+        var ctx = document.getElementById('assets-warehouse').getContext('2d');
+
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'bar',
+
+            // The data for our dataset
+            data: {
+                labels: labelArray,
+                datasets: [{
+                    label: 'Assets by warehouse',
+                    backgroundColor: 'rgb(0, 255, 240)',
+                    borderColor: 'rgb(0, 0, 0)',
+                    data: dataArray
+                }]
+            }
+        });
+
+
+    </script>
+
+}
