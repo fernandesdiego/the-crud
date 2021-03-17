@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using TheCRUD.DAL;
+using TheCRUD.Data;
 using TheCRUD.Models;
 using TheCRUD.ViewModels;
 

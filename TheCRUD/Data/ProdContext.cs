@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TheCRUD.Models;
 
-namespace TheCRUD.DAL
+namespace TheCRUD.Data
 {
     public class ProdContext : DbContext
     {

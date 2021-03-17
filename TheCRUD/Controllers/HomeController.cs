@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using TheCRUD.DAL;
+using TheCRUD.Data;
 using TheCRUD.Models;
 using TheCRUD.ViewModels;
 
