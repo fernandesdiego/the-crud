@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TheCRUD.Interfaces
 {
-    interface IRepository<T> : IDisposable
+    public interface IRepository<T> : IDisposable
     {
         Task AddAsync(T obj);
         Task<T> GetByIdAsync(int id);

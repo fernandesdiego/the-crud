@@ -6,7 +6,7 @@ using TheCRUD.Models;
 
 namespace TheCRUD.Interfaces
 {
-    interface IWarehouseRepository : IRepository<Warehouse>
+    public interface IWarehouseRepository : IRepository<Warehouse>
     {
     }
 }

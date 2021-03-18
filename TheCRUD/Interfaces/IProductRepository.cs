@@ -6,7 +6,7 @@ using TheCRUD.Models;
 
 namespace TheCRUD.Interfaces
 {
-    interface IProductRepository : IRepository<Product>
+    public interface IProductRepository : IRepository<Product>
     {
         Task<Product> GeProductAndWarehouseAsync(int id);
         Task<IEnumerable<Product>> GetAllProductsAndWarehouseAsync();

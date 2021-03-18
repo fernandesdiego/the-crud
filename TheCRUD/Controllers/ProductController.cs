@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TheCRUD.Data;
+using TheCRUD.Interfaces;
 using TheCRUD.Models;
 using TheCRUD.ViewModels;
 
@@ -13,23 +14,24 @@ namespace TheCRUD.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ProdContext _context;
 
-        public ProductController(ProdContext context)
+        private readonly IProductRepository _productContext;
+        private readonly IWarehouseRepository _warehouseContext;
+
+        public ProductController(IProductRepository productContext, IWarehouseRepository warehouseContext)
         {
-            _context = context;
+            _productContext = productContext;
+            _warehouseContext = warehouseContext;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.Include(x => x.Warehouse).ToListAsync());
+            return View(await _productContext.GetAllProductsAndWarehouseAsync());
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var product = await _context.Products
-                .Include(w => w.Warehouse)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _productContext.GeProductAndWarehouseAsync(id);
 
             if (product == null)
             {
@@ -39,9 +41,9 @@ namespace TheCRUD.Controllers
             return View(product);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ProductViewModel vm = new ProductViewModel(){ Warehouses = _context.Warehouses.ToList() };
+            ProductViewModel vm = new ProductViewModel() { Warehouses = await _warehouseContext.GetAllAsync() };
 
             return View(vm);
         }
@@ -52,8 +54,7 @@ namespace TheCRUD.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(viewmodel.Product);
-                await _context.SaveChangesAsync();
+                await _productContext.AddAsync(viewmodel.Product);
                 return RedirectToAction(nameof(Index));
             }
             return View();
@@ -61,9 +62,7 @@ namespace TheCRUD.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var product = await _context.Products                
-                .Include(w => w.Warehouse)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _productContext.GeProductAndWarehouseAsync(id);
 
             if (product == null)
             {
@@ -85,18 +84,18 @@ namespace TheCRUD.Controllers
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    await _productContext.UpdateAsync(product);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException e)
                 {
-                    if (!ProductExists(product.Id))
+                    if (!await ProductExists(product.Id))
                     {
                         return NotFound();
                     }
                     else
                     {
-                        throw;
+                        var vm = new ErrorViewModel();
+                        return View("Error", vm);
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -107,8 +106,7 @@ namespace TheCRUD.Controllers
         // GET: Product/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _productContext.GetByIdAsync(id);            
             if (product == null)
             {
                 return NotFound();
@@ -120,16 +118,16 @@ namespace TheCRUD.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+        {            
+            await _productContext.RemoveAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        private async Task<bool> ProductExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            var prod = await _productContext.GetByIdAsync(id);
+            
+            return prod!=null? true : false;
         }
     }
 }
