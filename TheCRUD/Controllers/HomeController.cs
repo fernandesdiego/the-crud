@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using TheCRUD.Data;
 using TheCRUD.Models;
 using TheCRUD.ViewModels;
+using TheCRUD.Interfaces;
 
 namespace TheCRUD.Controllers
 {
@@ -18,11 +19,15 @@ namespace TheCRUD.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ProdContext _context;
+        private readonly IWarehouseRepository _warehouseContext;
+        private readonly IProductRepository _productContext;
 
-        public HomeController(ILogger<HomeController> logger, ProdContext context)
+        public HomeController(ILogger<HomeController> logger, ProdContext context, IWarehouseRepository warehouseContext, IProductRepository productContext)
         {
             _logger = logger;
             _context = context;
+            _warehouseContext = warehouseContext;
+            _productContext = productContext;
         }
 
         public IActionResult Index()
@@ -31,12 +36,13 @@ namespace TheCRUD.Controllers
             return View();
         }
 
-        public JsonResult DashboardData()
+        public async Task<JsonResult> DashboardData()
         {
-            var warehouses = _context
-                .Warehouses
-                .Include(x => x.Products)
-                .ToList();
+            var warehouses = await _warehouseContext.GetAllWarehousesAndProductsAsync();
+            //var warehouses = _context
+            //    .Warehouses
+            //    .Include(x => x.Products)
+            //    .ToList();
 
             //var products = _context
             //    .Products

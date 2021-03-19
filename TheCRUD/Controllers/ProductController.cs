@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -86,7 +87,7 @@ namespace TheCRUD.Controllers
                 {
                     await _productContext.UpdateAsync(product);
                 }
-                catch (DbUpdateConcurrencyException e)
+                catch (DbUpdateConcurrencyException)
                 {
                     if (!await ProductExists(product.Id))
                     {
@@ -94,8 +95,7 @@ namespace TheCRUD.Controllers
                     }
                     else
                     {
-                        var vm = new ErrorViewModel();
-                        return View("Error", vm);
+                        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -127,7 +127,7 @@ namespace TheCRUD.Controllers
         {
             var prod = await _productContext.GetByIdAsync(id);
             
-            return prod!=null? true : false;
+            return prod != null;
         }
     }
 }
